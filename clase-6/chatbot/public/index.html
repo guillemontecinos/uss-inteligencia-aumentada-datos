@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clase 6</title>
+</head>
+<body>
+    <div>
+        <h1>Chat GPT bot</h1>
+    </div>
+    <div class="app">
+        <div id="bot" class="bot" style="height: 200px; overflow-y: auto;"></div>
+        <div class="user">
+            <input id="prompt" type="text" placeholder="Escríbele al bot.">
+            <button id="submit">Enviar</button>
+        </div>
+    </div>
+    <script>
+        const url = 'ws://' + location.host
+        const socket = new WebSocket(url)
+        
+        // Setup event listener to incoming messages from server
+        socket.addEventListener('message', (m) => {
+            const data = JSON.parse(m.data)
+            if(data.type == 'completion-response'){
+                document.getElementById('bot').innerHTML += '<br>' + data.response
+            }
+        })
+
+        // Define event listener to button that submits promt to server
+        document.getElementById('submit').addEventListener('click', () => {
+            const prompt = document.getElementById('prompt').value
+            if(prompt.length > 0){
+                if(socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({type: 'completion-request', prompt: prompt}))
+            }
+            document.getElementById('prompt').value = ''
+        })
+    </script>
+</body>
+</html>
